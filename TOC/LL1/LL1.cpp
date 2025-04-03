@@ -26,9 +26,14 @@ public:
 			first(nonTerminal);
 		}
 
-		follow('C');
-		logMapSet(firstMap);
-		logNonTerminalsPositions(nonTerminalsPos);
+		for (const Alphabet& nonTerminal : grammar.nonTerminals) {
+			follow(nonTerminal);
+		}
+		//follow('B');
+
+		//logNonTerminalsPositions(nonTerminalsPos);
+		//logMapSet(firstMap);
+		logMapSet(followMap);
 	}
 
 	AlphabetSet& first(Alphabet nonTerminal)
@@ -74,6 +79,48 @@ public:
 	{
 		if (!followMap[nonTerminal].empty()) {
 			return followMap[nonTerminal];
+		}
+
+		if (nonTerminal == grammar.start) {
+			followMap[nonTerminal].insert('$');
+		}
+		if (nonTerminalsPos[nonTerminal].empty()) {
+			followMap[nonTerminal].insert({});
+		}
+
+		for (const auto& pos: nonTerminalsPos[nonTerminal]) {
+			auto& [ruleNonT, ruleIndex, alphaIndex] = pos;
+			Rule rule = grammar.rules[ruleNonT][ruleIndex];
+			size_t nextAlphaIndex = alphaIndex + 1;
+			bool goToNextAlpha = true;
+
+			while (goToNextAlpha) {
+				goToNextAlpha = false;
+				Alphabet nextAlpha = rule[nextAlphaIndex];
+
+				if (grammar.isTerminal(nextAlpha) && nextAlpha != grammar.epsilon) {
+					followMap[nonTerminal].insert(nextAlpha);
+					break;
+				}
+
+				if (nextAlphaIndex >= rule.size()) {
+					if (nonTerminal != ruleNonT) {
+						AlphabetSet toAdd = follow(ruleNonT);
+						followMap[nonTerminal].insert(toAdd.begin(), toAdd.end());
+					}
+				}
+				else {
+					AlphabetSet toAdd = first(rule[nextAlphaIndex]);
+
+					if (toAdd.find(grammar.epsilon) != toAdd.end()) {
+						toAdd.erase(grammar.epsilon);
+						nextAlphaIndex++;
+						goToNextAlpha = true;
+					}
+
+					followMap[nonTerminal].insert(toAdd.begin(), toAdd.end());
+				}
+			}
 		}
 
 		return followMap[nonTerminal];
@@ -156,5 +203,5 @@ static CFG creategrammar4()
 
 int main()
 {
-	LL1 ll1(creategrammar1());
+	LL1 ll1(creategrammar3());
 }
