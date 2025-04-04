@@ -29,10 +29,11 @@ public:
 		for (const Alphabet& nonTerminal : grammar.nonTerminals) {
 			follow(nonTerminal);
 		}
+		//first('D');
 		//follow('B');
 
 		//logNonTerminalsPositions(nonTerminalsPos);
-		//logMapSet(firstMap);
+		logMapSet(firstMap);
 		logMapSet(followMap);
 	}
 
@@ -63,7 +64,10 @@ public:
 				else {
 					AlphabetSet toAdd = first(alpha);
 					if (toAdd.find(grammar.epsilon) != toAdd.end()) {
-						toAdd.erase(grammar.epsilon);
+						if (alphaIndex != rule.size() - 1) {
+							toAdd.erase(grammar.epsilon);
+						}
+
 						alphaIndex++;
 						goToNextAlpha = true;
 					}
@@ -201,7 +205,76 @@ static CFG creategrammar4()
 	return CFG(nonTerminals, terminals, rules, start);
 }
 
+static CFG creategrammar5()
+{
+	AlphabetSet nonTerminals = { 'S', 'B', 'C', 'D', 'E', 'F'};
+	AlphabetSet terminals = { 'a', 'b', 'c', 'g', 'f', 'h', '\0'};
+	ProductionRules rules = {
+		{'S', {"aBDh"}},
+		{'B', {"cC"} },
+		{'C', {"bC", "\0"}},
+		{'D', {"EF"}},
+		{'E', {"g", "\0"}},
+		{'F', {"f", "\0"}},
+	};
+	Alphabet start = 'S';
+	return CFG(nonTerminals, terminals, rules, start);
+}
+
+static CFG creategrammar6()
+{
+	AlphabetSet nonTerminals = { 'S', 'A', 'B', 'C'};
+	AlphabetSet terminals = { 'a', 'b', 'd', 'g', 'h', '\0' };
+	ProductionRules rules = {
+		{'S', {"ACB", "CbB", "Ba"}},
+		{'A', {"da", "BC"}},
+		{'B', {"g", "\0"}},
+		{'C', {"h", "\0"}},
+	};
+	Alphabet start = 'S';
+	return CFG(nonTerminals, terminals, rules, start);
+}
+
+static CFG creategrammar7()
+{
+	AlphabetSet nonTerminals = { 'S', 'B', 'C' };
+	AlphabetSet terminals = { 'a', 'b', 'c', '\0' };
+	ProductionRules rules = {
+		{'S', {"aB", "\0"}},
+		{'B', {"bC", "\0"}},
+		{'C', {"cS", "\0"}},
+	};
+	Alphabet start = 'S';
+	return CFG(nonTerminals, terminals, rules, start);
+}
+
+static CFG creategrammar8()
+{
+	AlphabetSet nonTerminals = { 'S', 'A', 'B' };
+	AlphabetSet terminals = { 'a', 'b', '\0' };
+	ProductionRules rules = {
+		{'S', {"AaAb", "BbBa"}},
+		{'A', {"\0"}},
+		{'B', {"\0"}},
+	};
+	Alphabet start = 'S';
+	return CFG(nonTerminals, terminals, rules, start);
+}
+
+static CFG creategrammar9()
+{
+	AlphabetSet nonTerminals = { 'S', 'A', 'E' };
+	AlphabetSet terminals = { 'i', 't', 'a', 'e', 'b', '\0'};
+	ProductionRules rules = {
+		{'S', {"iEtSA", "a"}},
+		{'A', {"eS", "\0"}},
+		{'E', {"b"}},
+	};
+	Alphabet start = 'S';
+	return CFG(nonTerminals, terminals, rules, start);
+}
+
 int main()
 {
-	LL1 ll1(creategrammar3());
+	LL1 ll1(creategrammar9());
 }
